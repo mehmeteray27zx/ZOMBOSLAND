@@ -1,0 +1,15 @@
+result=complete
+qa=0
+version=0.7
+started=2026-11-10 13:21:14
+level_seconds=177.6
+deaths=0
+shots_fired=29
+shots_hit=16
+shots_head=6
+damage_taken=0
+pharmacy_entered=yes
+stalls_over_20s=1
+quest_times=SearchFuse@0.8,CarryingFuse@123.6,FuseInstalled@177.6,Complete@177.6
+hints_shown=move:1,aim:1,reload:1,noammo:0,noise:1
+hints_completed=move:1,aim:0,reload:1,noammo:0,noise:1

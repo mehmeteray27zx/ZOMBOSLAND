@@ -1,0 +1,15 @@
+result=partial
+qa=0
+version=0.7
+started=2026-11-10 14:53:47
+level_seconds=16.3
+deaths=0
+shots_fired=1
+shots_hit=0
+shots_head=0
+damage_taken=0
+pharmacy_entered=no
+stalls_over_20s=0
+quest_times=ExploreStation@0.0
+hints_shown=move:0,aim:0,reload:0,noammo:0,noise:0
+hints_completed=move:0,aim:0,reload:0,noammo:0,noise:0
