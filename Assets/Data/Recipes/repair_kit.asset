@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb9ae28529784784fb03bec27daf79eb, type: 3}
+  m_Name: repair_kit
+  m_EditorClassIdentifier: Assembly-CSharp::Zombosland.RecipeDef
+  id: repair_kit
+  displayName: Tamir kiti
+  description: "Hurda ve bantla tamir tak\u0131m\u0131 haz\u0131rlar. Tezg\xE2h gerekir."
+  output: {fileID: 11400000, guid: 2db48c378c9114b488d8eb93053c968b, type: 2}
+  outputCount: 1
+  inputs:
+  - item: {fileID: 11400000, guid: 6f0d8615a25670d42a515075febd058d, type: 2}
+    count: 3
+  - item: {fileID: 11400000, guid: d5d1823fac439214e9a19b09b6b08bc1, type: 2}
+    count: 1
+  seconds: 6
+  needsBench: 1
+  available: 1

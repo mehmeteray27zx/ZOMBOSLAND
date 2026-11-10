@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9e87410834d8ec4c9dd84601ae2f21b, type: 3}
+  m_Name: chest_kit
+  m_EditorClassIdentifier: Assembly-CSharp::Zombosland.ItemDef
+  id: chest_kit
+  displayName: "Sand\u0131k kiti"
+  description: "Avluda depo kurmak i\xE7in gereken par\xE7alar."
+  kind: 4
+  maxStack: 1
+  icon: {fileID: 2800000, guid: ccc9ae2b037cbfa43a5ab5e36cccc5a3, type: 3}
+  healAmount: 0
+  meleeDamage: 0
+  meleeRange: 0
+  meleeSeconds: 0
+  noiseRadius: 0

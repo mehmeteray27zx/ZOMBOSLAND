@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9e87410834d8ec4c9dd84601ae2f21b, type: 3}
+  m_Name: stone
+  m_EditorClassIdentifier: Assembly-CSharp::Zombosland.ItemDef
+  id: stone
+  displayName: "Ta\u015F"
+  description: "Elde rahat tutulan sa\u011Flam bir ta\u015F."
+  kind: 0
+  maxStack: 10
+  icon: {fileID: 2800000, guid: 5dbdf9b385d73a34d8244011a5af35fc, type: 3}
+  healAmount: 0
+  meleeDamage: 0
+  meleeRange: 0
+  meleeSeconds: 0
+  noiseRadius: 0

@@ -1,0 +1,60 @@
+Mono path[0] = 'E:/ZOMBOSLAND/Build/Zombosland_Data/Managed'
+Mono config path = 'E:/ZOMBOSLAND/Build/MonoBleedingEdge/etc'
+CodeReloadManager initialized
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialize engine version: 6000.6.5f1 (3ff58d469c8a)
+[EntityIdStore] init: VM path (explicit commit), pageSize=4096, blockCount=1048576, entitiesPerBlock=256, slots reserved=4294967296 bytes
+[Subsystems] Discovering subsystems at path E:/ZOMBOSLAND/Build/Zombosland_Data/UnitySubsystems
+[D3D12 Device Filter] Vendor Name: NVIDIA
+[D3D12 Device Filter] Device Name: NVIDIA GeForce RTX 4080 SUPER
+[D3D12 Device Filter] Driver Version: 32.0.16.1088
+[D3D12 Device Filter] Feature Level: 12.2
+[D3D12 Device Filter] Graphics Memory: 16045 MB
+[D3D12 Device Filter] Processor Count: 12
+[D3D12 Device Filter] Device Type: Discrete
+GfxDevice: creating device client; kGfxThreadingModeSplitJobs
+d3d12: failed to query info queue interface (0x80004002).
+Direct3D:
+    Version:         Direct3D 12 [level 12.2]
+    Renderer:        NVIDIA GeForce RTX 4080 SUPER (ID=0x2702)
+    Vendor:          NVIDIA
+    VRAM:            16045 MB
+    App VRAM Budget: 15277 MB
+    Driver:          32.0.16.1088
+Begin MonoManager ReloadAssembly
+- Finished resetting the current domain, in  0.008 seconds
+[Physics::Module] Selected backend (deferred post-plugins).
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+<RI> Initializing input.
+<RI> Input initialized.
+The tree Pine_0 must use the Nature/Soft Occlusion shader. Otherwise billboarding/lighting will not work correctly.
+The tree Pine_1 must use the Nature/Soft Occlusion shader. Otherwise billboarding/lighting will not work correctly.
+The tree Pine_2 must use the Nature/Soft Occlusion shader. Otherwise billboarding/lighting will not work correctly.
+The tree Birch_Small couldn't be instanced because the prefab contains no valid mesh renderer.
+The tree Birch_Medium couldn't be instanced because the prefab contains no valid mesh renderer.
+UnloadTime: 1.285700 ms
+BOOT_SCENE=IlkIkmal
+BOOT_SCENE_LOADED=IlkIkmal
+QUEST state=SearchFuse t=0.5
+QUEST state=FreeRoam t=0.5
+SAVE loaded quest=FreeRoam bag=3 storage=0 doors=3 loot=28
+Shader 'Hidden/Universal Render Pipeline/GaussianDepthOfField' is not supported or has been stripped from the build (in 'DepthOfFieldGaussianPostProcessPass'). PostProcessing render passes will not execute.
+Shader 'Hidden/Universal Render Pipeline/GaussianDepthOfField' is not supported or has been stripped from the build (in 'DepthOfFieldGaussianPostProcessPass'). PostProcessing render passes will not execute.
+Shader 'Hidden/Universal Render Pipeline/BokehDepthOfField' is not supported or has been stripped from the build (in 'DepthOfFieldBokehPostProcessPass'). PostProcessing render passes will not execute.
+Shader 'Hidden/Universal Render Pipeline/PaniniProjection' is not supported or has been stripped from the build (in 'PaniniProjectionPostProcessPass'). PostProcessing render passes will not execute.
+GPU Resident Drawer created.
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 7.448500 ms
+BOOT_SCENE_LOADED=IlkIkmal
+Unloading 43 unused Assets to reduce memory usage. Loaded Objects now: 10793.
+Total: 2.306700 ms (FindLiveObjects: 0.307500 ms CreateObjectMapping: 0.043600 ms MarkObjects: 1.703600 ms  DeleteObjects: 0.191600 ms)
+
+QUEST state=SearchFuse t=49.8
+QUEST state=FreeRoam t=49.8
+SAVE loaded quest=FreeRoam bag=3 storage=0 doors=3 loot=28

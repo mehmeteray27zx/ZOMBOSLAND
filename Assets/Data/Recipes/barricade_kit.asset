@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb9ae28529784784fb03bec27daf79eb, type: 3}
+  m_Name: barricade_kit
+  m_EditorClassIdentifier: Assembly-CSharp::Zombosland.RecipeDef
+  id: barricade_kit
+  displayName: Barikat kiti
+  description: "Tahta ve hurdayla barikat par\xE7alar\u0131 haz\u0131rlar. Tezg\xE2h gerekir."
+  output: {fileID: 11400000, guid: 098c351684afad64c9da52a9c344a9d8, type: 2}
+  outputCount: 1
+  inputs:
+  - item: {fileID: 11400000, guid: 54fd0b5fea6454a4daa210d72d0b02cb, type: 2}
+    count: 5
+  - item: {fileID: 11400000, guid: 6f0d8615a25670d42a515075febd058d, type: 2}
+    count: 2
+  seconds: 8
+  needsBench: 1
+  available: 1

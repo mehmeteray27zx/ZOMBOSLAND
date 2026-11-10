@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb9ae28529784784fb03bec27daf79eb, type: 3}
+  m_Name: lure
+  m_EditorClassIdentifier: Assembly-CSharp::Zombosland.RecipeDef
+  id: lure
+  displayName: "Dikkat ta\u015F\u0131"
+  description: "Ta\u015F\u0131 kuma\u015Fa sarar. At\u0131nca ses \xE7\u0131kar\u0131r."
+  output: {fileID: 11400000, guid: 28b0971009634774b8c1d39de59d20ea, type: 2}
+  outputCount: 1
+  inputs:
+  - item: {fileID: 11400000, guid: fd689325e614d62409b67fb2ccaebaab, type: 2}
+    count: 1
+  - item: {fileID: 11400000, guid: a22d7031b31902241a59f3fceb3ea4f6, type: 2}
+    count: 1
+  seconds: 2
+  needsBench: 0
+  available: 1

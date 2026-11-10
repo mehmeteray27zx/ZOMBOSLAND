@@ -1,0 +1,44 @@
+VBCSCompilerPreWarmer: watching VBCSCompiler (PID 185628)
+VBCSCompilerPreWarmer: pre-warm launched (dotnet PID 186636)
+VBCSCompiler prewarm took 14.75 ms
+[Licensing::Module] Trying to connect to existing licensing client channel...
+Built from '6000.6/staging' branch; Version is '6000.6.5f1 (3ff58d469c8a) revision 4191629'; Using compiler version '194234433'; Build Type 'Release'
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-MSIGAMİNG" at "2026-11-07T21:31:50.4500431Z"
+OS: 'Windows 11  (10.0.26200) Professional' Language: 'tr' Physical Memory: 31784 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+System  architecture: x64
+Process architecture: x64
+Date: 2026-11-07T21:31:50Z
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 157252, path: "C:/Program Files/Unity Hub/UnityLicensingClient_V1/Unity.Licensing.Client.exe")
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.3+d7ffd15
+  Session Id:              cac55c187a394cac9f75a65501e8f827
+  Correlation Id:          bd885a98a2bfd4a583480c3e8c9da711
+  External correlation Id: 7655266448108572470
+  Machine Id:              HiqhmyRNL2HYLOy0i7VTPl6NNFs=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-MSIGAMİNG" (connect: 0.00s, validation: 0.00s, handshake: 0.05s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-MSIGAMİNG-notifications" at "2026-11-07T21:31:50.5043906Z"
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18966619531540-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.02
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.08s
+
+COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe
+-batchmode
+-quit
+-projectPath
+E:ZOMBOSLAND
+-executeMethod
+ArmsDiagnostics.Dump
+-logFile
+E:ZOMBOSLANDLogsv05a-diag.log
+Couldn't set project path to: E:/ZOMBOSLAND/E:ZOMBOSLAND
+[ExitDontLaunchBugReporter] Exiting without the bug reporter. Application will exit with return code 1

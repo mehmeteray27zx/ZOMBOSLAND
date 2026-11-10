@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9e87410834d8ec4c9dd84601ae2f21b, type: 3}
+  m_Name: supply_cache
+  m_EditorClassIdentifier: Assembly-CSharp::Zombosland.ItemDef
+  id: supply_cache
+  displayName: "Erzak \xE7antas\u0131"
+  description: "D\xFCkk\xE2ndaki dolapta b\u0131rak\u0131lm\u0131\u015F a\u011F\u0131r bir erzak \xE7antas\u0131. Avluya g\xF6t\xFCr\xFClmeli."
+  kind: 0
+  maxStack: 1
+  icon: {fileID: 2800000, guid: 62d7b0a7972c70b4480625e1aa144eb4, type: 3}
+  healAmount: 0
+  meleeDamage: 0
+  meleeRange: 0
+  meleeSeconds: 0
+  noiseRadius: 0
