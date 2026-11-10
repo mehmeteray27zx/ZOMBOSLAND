@@ -9,6 +9,14 @@ namespace Zombosland
 
         const int FlashCount = 4, WorldImpactCount = 16, BloodCount = 16, DecalCount = 64;
         const float FlashSeconds = 0.05f;
+        // Blood burst particle counts (head hits splash more; MakeBurst allows up to 3x the normal count).
+        const int BloodNormalBurst = 14, BloodHeadBurst = 24;
+        // Ground blood stains left by dying zombies: fixed ring, oldest is recycled.
+        const int StainCount = 12;
+        const float StainLift = 0.015f, StainMinScale = 0.6f, StainMaxScale = 1.2f, StainRayUp = 0.4f, StainRayLength = 2.5f;
+        // Level geometry only: no zombies / corpses / hitboxes / triggers, and not the player.
+        const int StainMask = Layers.SightMask & ~(1 << Layers.Player);
+        static readonly Color StainColor = new Color(0.22f, 0.01f, 0.01f, 0.8f);
 
         public Material flashMaterial, dustMaterial, sparkMaterial, bloodMaterial, decalMaterial;
         // Optional shell casings (12 pooled physics bodies). Left empty = feature off.
@@ -24,8 +32,9 @@ namespace Zombosland
 
         Transform[] flashes; Light[] flashLights; float[] flashOff;
         ParticleSystem[][] worldImpacts; ParticleSystem[] blood;
-        Transform[] decals;
-        int nextFlash, nextWorld, nextBlood, nextDecal;
+        Transform[] decals, stains;
+        int[] bloodBursts;
+        int nextFlash, nextWorld, nextBlood, nextDecal, nextStain;
         bool ready;
 
         void Awake()
@@ -40,6 +49,7 @@ namespace Zombosland
             BuildFlashes();
             BuildImpacts();
             BuildDecals();
+            BuildStains();
             ready = true;
         }
 
@@ -216,11 +226,13 @@ namespace Zombosland
                 worldImpacts[i] = new[] { dust, sparks };
             }
             blood = new ParticleSystem[BloodCount];
+            bloodBursts = new int[BloodCount];
             for (int i = 0; i < BloodCount; i++)
             {
+                bloodBursts[i] = BloodNormalBurst;
                 var root = new GameObject("BloodImpact " + i).transform;
                 root.SetParent(transform, false);
-                blood[i] = MakeBurst("Blood", root, bloodMaterial, 14, 0.7f, 3.2f, 0.05f, new Color(0.45f, 0.02f, 0.02f, 0.95f), new Color(0.25f, 0.0f, 0.0f, 0.9f), 1.0f, 38f, false);
+                blood[i] = MakeBurst("Blood", root, bloodMaterial, BloodNormalBurst, 0.7f, 3.2f, 0.05f, new Color(0.45f, 0.02f, 0.02f, 0.95f), new Color(0.25f, 0.0f, 0.0f, 0.9f), 1.0f, 38f, false);
             }
         }
 
@@ -284,11 +296,58 @@ namespace Zombosland
             foreach (ParticleSystem ps in set) { ps.Clear(true); ps.Play(true); }
         }
 
-        public void BloodImpact(Vector3 point, Vector3 normal)
+        public void BloodImpact(Vector3 point, Vector3 normal) { BloodImpact(point, normal, false); }
+
+        // `strong` (head hits) emits a bigger burst; the burst count is only rewritten when it changes.
+        public void BloodImpact(Vector3 point, Vector3 normal, bool strong)
         {
             if (!ready) return;
-            ParticleSystem ps = blood[nextBlood]; nextBlood = (nextBlood + 1) % BloodCount;
-            Fire(ps, point, normal);
+            int i = nextBlood; nextBlood = (nextBlood + 1) % BloodCount;
+            int want = strong ? BloodHeadBurst : BloodNormalBurst;
+            if (bloodBursts[i] != want)
+            {
+                var emission = blood[i].emission;
+                emission.SetBurst(0, new ParticleSystem.Burst(0f, (short)want));
+                bloodBursts[i] = want;
+            }
+            Fire(blood[i], point, normal);
+        }
+
+        // ---- ground blood stains ----
+
+        void BuildStains()
+        {
+            stains = new Transform[StainCount];
+            var block = new MaterialPropertyBlock();
+            block.SetColor("_BaseColor", StainColor); // the decal material is dark grey; stains are dark red
+            for (int i = 0; i < StainCount; i++)
+            {
+                var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                Destroy(quad.GetComponent<Collider>());
+                quad.name = "BloodStain " + i;
+                quad.transform.SetParent(transform, false);
+                var rend = quad.GetComponent<Renderer>();
+                rend.sharedMaterial = decalMaterial;
+                rend.SetPropertyBlock(block);
+                rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                rend.receiveShadows = false;
+                quad.SetActive(false);
+                stains[i] = quad.transform;
+            }
+        }
+
+        // One downward ray from the body; the oldest stain is recycled when the ring is full.
+        public void BloodStain(Vector3 bodyPosition)
+        {
+            if (!ready || stains == null) return;
+            RaycastHit hit;
+            if (!Physics.Raycast(bodyPosition + Vector3.up * StainRayUp, Vector3.down, out hit, StainRayLength, StainMask, QueryTriggerInteraction.Ignore)) return;
+            if (hit.normal.y < 0.5f) return; // floors only
+            Transform s = stains[nextStain]; nextStain = (nextStain + 1) % StainCount;
+            s.position = hit.point + hit.normal * StainLift;
+            s.rotation = Quaternion.LookRotation(-hit.normal) * Quaternion.Euler(0, 0, Random.Range(0f, 360f));
+            s.localScale = Vector3.one * Random.Range(StainMinScale, StainMaxScale);
+            s.gameObject.SetActive(true);
         }
 
         // ---- decals ----

@@ -197,6 +197,7 @@ namespace Zombosland
             if (animator != null) { animator.StopClips(); animator.enabled = false; }
             if (ragdoll != null) ragdoll.Activate(info);
             if (SfxBank.Instance != null) SfxBank.Instance.Play(Sfx.ZombieDeath, transform.position + Vector3.up, 1f, Random.Range(0.92f, 1.05f), true);
+            if (EffectPool.Instance != null) EffectPool.Instance.BloodStain(transform.position);
             if (director != null) director.RegisterCorpse(this);
         }
 

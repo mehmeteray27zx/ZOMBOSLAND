@@ -41,7 +41,7 @@ namespace Zombosland
             {
                 float sensitivity = GameSettings.Sensitivity;
                 transform.Rotate(0, Input.GetAxisRaw("Mouse X") * sensitivity, 0);
-                pitch = Mathf.Clamp(pitch - Input.GetAxisRaw("Mouse Y") * sensitivity, -85, 85);
+                pitch = Mathf.Clamp(pitch - Input.GetAxisRaw("Mouse Y") * sensitivity * (GameSettings.InvertY ? -1f : 1f), -85, 85);
             }
             Recoil = Mathf.MoveTowards(Recoil, 0, 12 * dt);
             aimPivot.localRotation = Quaternion.Euler(pitch - Recoil, 0, 0);

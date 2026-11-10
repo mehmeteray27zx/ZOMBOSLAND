@@ -115,7 +115,7 @@ namespace Zombosland
             }
 
             // Zombie hit (corpses included): blood only, never a decal on a body.
-            if (fx != null) fx.BloodImpact(hit.point, hit.normal);
+            if (fx != null) fx.BloodImpact(hit.point, hit.normal, part.zone == HitZone.Head);
             if (sfx != null) sfx.Play(Sfx.HitFlesh, hit.point, 0.9f, UnityEngine.Random.Range(0.92f, 1.08f), true);
             if (part.owner == null || part.owner.IsDead) return;
             var info = new DamageInfo
@@ -128,7 +128,13 @@ namespace Zombosland
             };
             PlaytestLog.RecordHit(part.zone);
             bool killed = part.Hit(info);
-            if (sfx != null) sfx.Play(Sfx.HitTick, Vector3.zero, killed ? 0.4f : 0.25f, killed ? 0.85f : 1f, false); // hit confirmation, 2D
+            bool head = part.zone == HitZone.Head;
+            if (sfx != null)
+            {
+                if (head) PlayHeadCrack(sfx); // replaces the tick on head hits
+                else sfx.Play(Sfx.HitTick, Vector3.zero, killed ? 0.4f : 0.25f, killed ? 0.85f : 1f, false); // hit confirmation, 2D
+            }
+            if (head && killed) StartHitStop(HitStopHeadKillSeconds);
             HitMarkerTime = Time.time;
             if (HitConfirmed != null) HitConfirmed(part.zone, killed);
         }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Zombosland
 {
-    public enum Sfx { Shot, DryFire, MagOut, MagIn, Slide, HitFlesh, HitConcrete, ZombieGrowl, ZombieAttack, ZombieDeath, PlayerHurt, ReloadTactical, ReloadEmpty, Casing, AimIn, HitTick, PickupSoft, PickupHard, Deny, LidOpen, LidClose, BandageTie, Equip, Holster }
+    public enum Sfx { Shot, DryFire, MagOut, MagIn, Slide, HitFlesh, HitConcrete, ZombieGrowl, ZombieAttack, ZombieDeath, PlayerHurt, ReloadTactical, ReloadEmpty, Casing, AimIn, HitTick, PickupSoft, PickupHard, Deny, LidOpen, LidClose, BandageTie, Equip, Holster, HeadCrack }
 
     // Procedural placeholder audio plus a pooled set of 3D AudioSources.
     // Real recordings assigned in `overrides` (builder reads Assets/Audio/<name>.wav) win over synthesis;
@@ -77,6 +77,14 @@ namespace Zombosland
             clips[(int)Sfx.BandageTie] = new[] { SfxSynth.Soft("bandage_tie", 0.25f, 0.18f) };
             clips[(int)Sfx.Equip] = new[] { SfxSynth.Click("equip", 0.1f, 800f, 0.6f) };
             clips[(int)Sfx.Holster] = new[] { SfxSynth.Click("holster", 0.11f, 520f, 0.6f) };
+            clips[(int)Sfx.HeadCrack] = new[] { SfxSynth.HeadCrack(r, 2600f), SfxSynth.HeadCrack(r, 3000f), SfxSynth.HeadCrack(r, 2300f) };
+            // Extra variants for the most-heard combat sounds. Own random stream: the clips above keep their exact samples.
+            var v = new System.Random(778);
+            clips[(int)Sfx.HitFlesh] = new[] { clips[(int)Sfx.HitFlesh][0], clips[(int)Sfx.HitFlesh][1], SfxSynth.HitFlesh(v, 95f, 0.05f), SfxSynth.HitFlesh(v, 130f, 0.035f) };
+            clips[(int)Sfx.HitConcrete] = new[] { clips[(int)Sfx.HitConcrete][0], clips[(int)Sfx.HitConcrete][1], SfxSynth.HitConcrete(v), SfxSynth.HitConcrete(v) };
+            clips[(int)Sfx.ZombieGrowl] = new[] { clips[(int)Sfx.ZombieGrowl][0], clips[(int)Sfx.ZombieGrowl][1], clips[(int)Sfx.ZombieGrowl][2], SfxSynth.Growl(v, 1.1f, 0.08f, 7f) };
+            clips[(int)Sfx.ZombieAttack] = new[] { clips[(int)Sfx.ZombieAttack][0], SfxSynth.Growl(v, 0.5f, 0.2f, 12f), SfxSynth.Growl(v, 0.7f, 0.16f, 16f) };
+            clips[(int)Sfx.ZombieDeath] = new[] { clips[(int)Sfx.ZombieDeath][0], SfxSynth.Death(v, 1.1f, 100f, 45f), SfxSynth.Death(v, 1.4f, 80f, 34f) };
             if (overrides != null)
             {
                 var grouped = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<AudioClip>>();
@@ -250,7 +258,7 @@ namespace Zombosland
             return Make(name, d);
         }
 
-        public static AudioClip HitFlesh(System.Random r)
+        public static AudioClip HitFlesh(System.Random r, float thumpHz = 110f, float noiseDecay = 0.04f)
         {
             int n = (int)(Rate * 0.2f);
             var d = new float[n];
@@ -259,7 +267,7 @@ namespace Zombosland
             {
                 float t = (float)i / Rate;
                 lp += 0.08f * (Noise(r) - lp);
-                d[i] = lp * 4f * Mathf.Exp(-t / 0.04f) + Mathf.Sin(TwoPi * 110f * t) * Mathf.Exp(-t / 0.05f) * 0.5f;
+                d[i] = lp * 4f * Mathf.Exp(-t / noiseDecay) + Mathf.Sin(TwoPi * thumpHz * t) * Mathf.Exp(-t / 0.05f) * 0.5f;
             }
             return Make("hit_flesh", d);
         }
@@ -299,9 +307,30 @@ namespace Zombosland
             return Make("growl", d);
         }
 
-        public static AudioClip Death(System.Random r)
+        // Short, high, bone-like crack for head hits: noise transient, two quick crunches and a falling tone.
+        public static AudioClip HeadCrack(System.Random r, float startHz)
         {
-            float duration = 1.3f;
+            int n = (int)(Rate * 0.16f);
+            var d = new float[n];
+            float lp = 0f, phase = 0f;
+            for (int i = 0; i < n; i++)
+            {
+                float t = (float)i / Rate;
+                float white = Noise(r);
+                float high = white - lp; lp += 0.5f * (white - lp);
+                float crack = high * Mathf.Exp(-t / 0.012f) * 1.1f;
+                float crunch = t > 0.035f ? high * Mathf.Exp(-(t - 0.035f) / 0.01f) * 0.6f : 0f;
+                float crunch2 = t > 0.06f ? high * Mathf.Exp(-(t - 0.06f) / 0.012f) * 0.4f : 0f;
+                phase += Mathf.Lerp(startHz, 900f, Mathf.Clamp01(t / 0.08f)) / Rate;
+                float tone = Mathf.Sin(TwoPi * phase) * Mathf.Exp(-t / 0.03f) * 0.5f;
+                float thump = Mathf.Sin(TwoPi * 140f * t) * Mathf.Exp(-t / 0.04f) * 0.35f;
+                d[i] = crack + crunch + crunch2 + tone + thump;
+            }
+            return Make("head_crack", d);
+        }
+
+        public static AudioClip Death(System.Random r, float duration = 1.3f, float fromHz = 90f, float toHz = 38f)
+        {
             int n = (int)(Rate * duration);
             var d = new float[n];
             float lp = 0f, phase = 0f;
@@ -310,7 +339,7 @@ namespace Zombosland
                 float t = (float)i / Rate;
                 float u = t / duration;
                 lp += 0.07f * (Noise(r) - lp);
-                float pitch = Mathf.Lerp(90f, 38f, u);
+                float pitch = Mathf.Lerp(fromHz, toHz, u);
                 phase += pitch / Rate;
                 float saw = (phase % 1f) * 2f - 1f;
                 float env = Mathf.Clamp01(t / 0.05f) * Mathf.Exp(-t / 0.5f);

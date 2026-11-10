@@ -78,6 +78,7 @@ namespace Zombosland
             float scale = Mathf.Clamp(Screen.height / 1080f, .75f, 2f);
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one * scale);
             float w = Screen.width / scale, h = Screen.height / scale;
+            if (MainMenu.Active) { MainMenu.Draw(player, w, h); return; } // the main menu hides the whole HUD
 
             PlayerSurvival survival = player.Survival;
             bool screen = survival != null && survival.UiOpen && !player.IsDead;

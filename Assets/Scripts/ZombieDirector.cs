@@ -19,7 +19,7 @@ namespace Zombosland
         // Pre-baked NavMesh (IlkIkmal open region, built by the editor). When assigned it is added instead of building at run time.
         public NavMeshData bakedNavMesh;
 
-        const int MaxCorpses = 24;
+        const int MaxCorpses = 10;
         const float CorpseSeconds = 20f;
 
         readonly List<ZombieBrain> corpses = new List<ZombieBrain>();

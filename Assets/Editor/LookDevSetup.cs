@@ -236,12 +236,12 @@ public static class LookDevSetup
         if (asset == null) { Report.Add("PC_RPAsset not found"); return; }
         var so = new SerializedObject(asset);
         SetInt(so, "m_SupportsHDR", 1);
-        SetFloat(so, "m_ShadowDistance", 110f);
+        SetFloat(so, "m_ShadowDistance", 60f);
         SetInt(so, "m_ShadowCascadeCount", 3);
         SetInt(so, "m_SoftShadowsSupported", 1);
-        SetInt(so, "m_SoftShadowQuality", 3);       // High
+        SetInt(so, "m_SoftShadowQuality", 2);       // Medium
         SetFloat(so, "m_RenderScale", 1f);
-        SetInt(so, "m_MainLightShadowmapResolution", 4096);
+        SetInt(so, "m_MainLightShadowmapResolution", 2048);
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(asset);
         var active = ActiveAsset();

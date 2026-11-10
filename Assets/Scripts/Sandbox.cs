@@ -20,7 +20,8 @@ namespace Zombosland
 
         public bool IsPaused { get { return paused; } }
         // Inventory / crafting screen is open: movement, firing and interaction are off, the cursor is free.
-        public bool UiOpen { get { return survival != null && survival.UiOpen; } }
+        // The main menu counts as an open screen too, so nothing in the world can be focused or pressed behind it.
+        public bool UiOpen { get { return MainMenu.Active || (survival != null && survival.UiOpen); } }
         public PlayerSurvival Survival { get { return survival; } }
         public Vector3 SafePosition { get { return safePosition; } }
         public bool ZombiesFrozen { get { return paused || qaFreeze; } }
@@ -60,6 +61,7 @@ namespace Zombosland
             if (QaArgs.Has("--qa-axe") && GetComponent<QaAxe>() == null) gameObject.AddComponent<QaAxe>();
             if (QaArgs.Has("--qa-reload") && GetComponent<QaReload>() == null) gameObject.AddComponent<QaReload>();
             if (QaArgs.Has("--qa-hands") && GetComponent<QaHands>() == null) gameObject.AddComponent<QaHands>();
+            if (MainMenu.TryBegin()) SetPaused(true); // main menu: frozen like the pause menu until it closes
         }
 
         // QA hooks for --qa-screens (never used by normal play).
@@ -68,6 +70,7 @@ namespace Zombosland
 
         void Update()
         {
+            TickHitStop();
             if (dead)
             {
                 if (SecondsSinceDeath >= 2f) SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -83,11 +86,14 @@ namespace Zombosland
             CheckFall();
         }
 
-        // Esc closes the inventory first (the pause menu does not open); otherwise it toggles the pause menu.
+        // Esc: main menu -> back out of a sub page (nothing at its root); inventory -> close it (the pause menu does not open);
+        // pause menu -> back out of a sub page or dialog, else resume; otherwise open the pause menu.
         void HandleEscape()
         {
-            if (UiOpen) survival.CloseUi();
-            else SetPaused(!paused);
+            if (MainMenu.Active) MainMenu.OnEscape();
+            else if (UiOpen) survival.CloseUi();
+            else if (!paused) SetPaused(true);
+            else if (!PauseMenu.OnEscape()) SetPaused(false);
         }
 
         // QA hook: the same path as the Esc key.
@@ -140,10 +146,15 @@ namespace Zombosland
         void SetPaused(bool value)
         {
             paused = value;
+            hitStopActive = false; // the menu owns timeScale from here
+            if (value) PauseMenu.Reset(); // the pause menu always opens at its root page
             Time.timeScale = value ? 0 : 1;
             SetCursor(value || UiOpen);
             if (!value) GameSettings.Save();
         }
+
+        // The menus' "Devam et" (pause menu and main menu).
+        internal void ResumeFromMenu() { SetPaused(false); }
 
         // Cursor control for the UI (IMGUI inventory etc.).
         internal void SetCursorForUi(bool visible) { SetCursor(visible || paused || dead); }
@@ -171,6 +182,7 @@ namespace Zombosland
         public void Restart()
         {
             GameSettings.Save();
+            hitStopActive = false;
             Time.timeScale = 1;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }

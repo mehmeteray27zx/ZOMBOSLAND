@@ -108,7 +108,7 @@ namespace Zombosland
                 if (sfx != null) sfx.Play(Sfx.HitConcrete, hit.point, 0.7f, UnityEngine.Random.Range(0.7f, 0.85f), true);
                 return;
             }
-            if (fx != null) fx.BloodImpact(hit.point, hit.normal);
+            if (fx != null) fx.BloodImpact(hit.point, hit.normal, part.zone == HitZone.Head);
             if (sfx != null) sfx.Play(Sfx.HitFlesh, hit.point, 1f, UnityEngine.Random.Range(0.8f, 0.95f), true);
             if (part.owner == null || part.owner.IsDead) return;
             var info = new DamageInfo
@@ -122,7 +122,12 @@ namespace Zombosland
             PlaytestLog.RecordHit(part.zone);
             MeleeLanded++;
             bool killed = part.Hit(info);
-            if (sfx != null) sfx.Play(Sfx.HitTick, Vector3.zero, killed ? 0.4f : 0.25f, killed ? 0.85f : 1f, false);
+            if (sfx != null)
+            {
+                if (part.zone == HitZone.Head) PlayHeadCrack(sfx);
+                else sfx.Play(Sfx.HitTick, Vector3.zero, killed ? 0.4f : 0.25f, killed ? 0.85f : 1f, false);
+            }
+            MeleeHitFeedback(killed);
             HitMarkerTime = Time.time;
             if (HitConfirmed != null) HitConfirmed(part.zone, killed);
         }
