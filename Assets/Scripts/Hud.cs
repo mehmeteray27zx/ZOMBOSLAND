@@ -143,6 +143,15 @@ namespace Zombosland
             Rect bar = new Rect(box.x + 126f, box.y + 24f, box.width - 126f - 16f, 8f);
             UiTheme.Fill(bar, UiTheme.Rule);
             UiTheme.Fill(new Rect(bar.x, bar.y, bar.width * fraction, bar.height), c);
+
+            // Stamina: a thin line on top of the health box, hidden while full. Critical colour while sprint is locked.
+            float stamina = motor.Stamina01;
+            if (stamina < 0.999f)
+            {
+                Rect line = new Rect(box.x, box.y - 7f, box.width, 4f);
+                UiTheme.Fill(line, UiTheme.WithAlpha(UiTheme.Panel, 0.86f));
+                UiTheme.Fill(new Rect(line.x, line.y, line.width * stamina, line.height), motor.Exhausted ? UiTheme.Critical : UiTheme.Text);
+            }
         }
 
         // Bottom right: "8 / 24", "9 mm" under it, reload bar and short states. The bat name replaces it while a melee weapon is in hand.

@@ -15,12 +15,13 @@ Yol kuralı: Tablolardaki dosya yolu `Assets\Scripts`'e göreli. `Editor` ve `Da
 
 | Şunu değiştirmek istiyorsan | Dosya | Sabit / metot |
 |---|---|---|
-| Zombi kovalama hızı | `ZombieBrain.cs` | `chaseSpeed` = `Random.Range(1.6, 2.2)` (zombi başına bir kez atanır; `const` değil) |
-| Zombi yürüme hızı | `ZombieBrain.cs` | `WalkSpeed` 1.1 (`InvestigateSpeedFactor` 1.5) |
+| Zombi türü değerleri (hız, can, saldırı, görüş) | `ZombieDef.cs` (SO), asset `Assets/Data/Zombies/Zombie_Default.asset` | Aşağıdaki dört satırın hepsi burada. Asset yoksa ya da prefab'da `def` boşsa `ZombieDef.Fallback` (aynı varsayılanlar) kullanılır. Yeni tür = yeni asset |
+| Zombi kovalama hızı | `ZombieDef.cs` | `chaseSpeedMin` 4.5, `chaseSpeedMax` 5.0 (zombi başına bir kez rastgele atanır); ajan ivmesi `acceleration` 16, dönüş `turnSpeed` 420 |
+| Zombi yürüme hızı | `ZombieDef.cs` | `walkSpeed` 1.1 (`investigateSpeedFactor` 1.5) |
 | Zombi koşu/yürüyüş animasyon hızı | `ZombieAnimator.cs` | `clipRunSpeed` 3, `clipWalkSpeed` 1.2 |
-| Zombi canı | `ZombieBrain.cs` | `MaxHealth` 100 |
-| Zombi görüş menzili / açısı | `ZombieBrain.cs` | `SightRange` 18, `SightHalfAngle` 55, `CloseSense` 2 |
-| Zombi saldırı hasarı / menzil / bekleme | `ZombieBrain.cs` | `AttackDamage` 10, `AttackRange` 1.6, `AttackCooldown` 1.2, `AttackWindupSeconds` 0.75 |
+| Zombi canı | `ZombieDef.cs` | `maxHealth` 55 |
+| Zombi görüş menzili / açısı | `ZombieDef.cs` | `sightRange` 18, `sightHalfAngle` 55, `closeSense` 2 |
+| Zombi saldırı hasarı / menzil / bekleme | `ZombieDef.cs` | `attackDamage` 10, `attackRange` 1.6, `attackCooldown` 1.2, `attackWindupSeconds` 0.75. Dikkat: saldırı klibinin hızı `ZombieFactory` içinde sabit `ZombieBrain.AttackWindupSeconds` (0.75) ile hesaplanır; def'te windup değişirse klip uyuşmaz |
 | Zombi durum makinesi | `ZombieBrain.cs` | `enum ZombieState` (Idle, Wander, Chase, Attack, Stagger, Dead, Investigate, BreakBarricade), `OnNoise`, `OnDistraction` |
 | Zombi spawn / yerleşim noktaları | `Editor/IlkIkmalBuilder.cs` (`ZombieSpot`, `BuildZombies`), `Editor/SandboxBuilder.cs` (`BuildDirectorAndZombies`), `Editor/OpenWorldBuilder.Gameplay.cs` (açık bölge zombi noktaları) | runtime: `ZombieDirector.SpawnFixed(count, seed)`, `Spawn`, `navCenter`, `navSize` |
 | Ceset limiti / ceset süresi | `ZombieDirector.cs` | `MaxCorpses` 24, `CorpseSeconds` 20 |
@@ -34,7 +35,9 @@ Yol kuralı: Tablolardaki dosya yolu `Assets\Scripts`'e göreli. `Editor` ve `Da
 | Ateş sonrası kamera sarsıntısı | `Sandbox.Weapon.cs`, `CameraEffects.cs` | `AddShake(0.12)`; `CameraEffects.LateUpdate` |
 | Yakın dövüş (sopa / balta) değerleri | `Item` asset'leri `Assets/Data/Items/bat.asset`, `axe.asset` | `meleeDamage` (sopa 40, balta 60), `meleeSeconds` (sopa 0.7, balta 1), `meleeRange` (sopa 1.9) |
 | Yakın dövüş vuruş anı / küre | `Sandbox.Melee.cs` | `MeleeHitAt` 0.35, `MeleeSphere` 0.18, `MeleeNoiseRadius` 5, `TryMeleeSwing`, `MeleeHit` |
-| Oyuncu yürüme / koşma / eğilme hızı | `PlayerMotor.cs` | `Tick()` içinde sabit değerler: yürüme 4, koşma 6, eğilme 2.2 m/s (sabit tanımlı değil, satır içi) |
+| Oyuncu yürüme / koşma / eğilme hızı | `PlayerMotor.cs` | `WalkSpeed` 4, `SprintSpeed` 6, `CrouchSpeed` 2.2 m/s |
+| Zıplama ve havada hareket | `PlayerMotor.cs` | `JumpHeight` (tepe, m), `Gravity` (çıkış), `FallGravity` (iniş), `MaxFallSpeed`, `CoyoteTime`, `JumpBuffer`, `AirSteer` |
+| Stamina (koşu ve zıplama harcar) | `PlayerMotor.cs`, `Hud.cs` | `MaxStamina` 100, `SprintDrain` 12/sn, `StaminaRegen` 18/sn, `RegenDelay` 1 sn, `JumpCost` 12, `RecoverThreshold` 25; dışarıya `Stamina01`, `Exhausted`. Çizgi `Hud.DrawHealth` içinde |
 | Kamera sarsıntısı (ayar) | `GameSettings.cs`, `CameraEffects.cs` | `GameSettings.CameraShake` (0–1), `AddShake` |
 | Headbob | `CameraEffects.cs`, `GameSettings.cs` | `LateUpdate` içinde genlik 0.012 / 0.025; `GameSettings.Headbob` |
 | FOV / fare hassasiyeti / ana ses | `GameSettings.cs` | `Fov` 75, `Sensitivity` 2, `MasterVolume` 1 |
@@ -115,7 +118,8 @@ Sütunlar: Dosya (`Assets\Scripts`'e göre) | Ana tip(ler) | Sorumluluk | Öneml
 
 | Dosya | Ana tip(ler) | Sorumluluk | Önemli üyeler |
 |---|---|---|---|
-| `ZombieBrain.cs` | `ZombieBrain`, `ZombieState` | Algı, açık durum makinesi, saldırı, hasar alma ve sendeleme kararı | `MaxHealth` 100, `SightRange` 18, `AttackDamage` 10, `Activate`, `Alert`, `ApplyDamage`, `Player` |
+| `ZombieBrain.cs` | `ZombieBrain`, `ZombieState` | Algı, açık durum makinesi, saldırı, hasar alma ve sendeleme kararı. Sayısal değerleri `def`'ten okur | `def`, `Def`, `Activate`, `Alert`, `ApplyDamage`, `Player`, `AttackWindupSeconds` |
+| `ZombieDef.cs` | `ZombieDef` (SO) | Zombi türünün değerleri: hız, can, saldırı, görüş | `walkSpeed`, `chaseSpeedMin`/`Max`, `maxHealth`, `attackDamage`, `sightRange`, `Fallback` |
 | `ZombieDirector.cs` | `ZombieDirector` (`Instance`) | Runtime NavMesh inşası, zombi aktivasyonu, spawn, ceset yönetimi | `Instance`, `player`, `zombiePrefabs`, `BuildNavMesh`, `SpawnFixed`, `RegisterCorpse` |
 | `ZombieAnimator.cs` | `ZombieAnimator` | Klipleri sürer, prosedürel flinch ve saldırı pozu | `SetVariant`, `DriveClip`, `TriggerAttack`, `TriggerHeavyHit`, `StopClips` |
 | `ZombiePart.cs` | `ZombiePart` | Kemik hitbox'ı; hasarı sahibine iletir, bölgeyi belirler | `Hit`, `owner` |
@@ -308,6 +312,7 @@ Kaynak: `BootRouter.cs`, `PerfHarness.cs`, `Sandbox.cs`, `ViewmodelPresenter.cs`
 | `ItemDef` | `Survival/ItemDef.cs` | `Assets/Data/Items/*.asset` | 13 |
 | `RecipeDef` | `Survival/RecipeDef.cs` | `Assets/Data/Recipes/*.asset` | 6 |
 | `ItemDatabase` | `Survival/ItemDatabase.cs` | `Assets/Data/ItemDatabase.asset` | 1 |
+| `ZombieDef` | `ZombieDef.cs` | `Assets/Data/Zombies/Zombie_Default.asset` (`ZombieFactory.EnsureDefaultDef` yoksa oluşturur; 13 Kasım'da henüz üretilmedi) | 1 |
 
 Eşyalar: `axe` (meleeDamage 60, süre 1), `bandage` (heal 25, stack 5), `barricade_kit` (stack 2), `bat` (meleeDamage 40, süre 0.7, menzil 1.9), `chest_kit`, `cloth` (10), `lure` (5), `repair_kit` (3), `scrap` (10), `stone` (10), `supply_cache` (1), `tape` (5), `wood` (10).
 Tarifler: `bandage` (3 s), `barricade_kit` (8 s), `chest_kit` (8 s), `lure` (2 s), `bat` (4 s), `repair_kit` (6 s). `axe` ve `supply_cache` için tarif dosyası yok.
@@ -317,7 +322,7 @@ Editör tarafında: `SurvivalAssets.cs` SO'ları yalnız eksikse oluşturur, bö
 ### 5.2 Koda `const` olarak gömülü içerik
 
 - Hasar ve sendeleme: `DamageRules` (34, 60, 1.2, 1.5, çarpanlar).
-- Zombi: `ZombieBrain` (100 can, 18 m görüş, 10 hasar, 1.1 m/s yürüyüş), `ZombieDirector` (24 ceset, 20 s).
+- Zombi: `ZombieDef` varsayılanları (55 can, 18 m görüş, 10 hasar, 1.1 m/s yürüyüş, 4.5–5.0 m/s kovalama), `ZombieDirector` (24 ceset, 20 s).
 - Silah: `WeaponState` (12 şarjör, 0.25 s, 1.41/1.93 s reload), `Sandbox.Weapon` (100 m menzil).
 - Yakın dövüş yedek değerleri: `Sandbox.Melee` (`DefaultMeleeDamage` 40, `DefaultMeleeRange` 1.9, `DefaultMeleeSeconds` 0.7). Süre için kodda doğrulandı: asset değeri 0 veya eksikse yedek devreye girer.
 - Animasyon süreleri: `ViewmodelPresenter` (reload, çekme, bandaj).

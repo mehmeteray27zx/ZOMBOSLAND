@@ -5,9 +5,32 @@ namespace Zombosland
     // Look + movement. Yaw lives on the body, pitch and recoil on AimPivot (the shot origin).
     public class PlayerMotor : MonoBehaviour
     {
+        // Jump and air movement tuning.
+        const float JumpHeight = 0.9f;   // apex in metres
+        const float Gravity = 20f;       // m/s^2 while rising; stronger than Physics.gravity so the jump is short
+        const float FallGravity = 32f;   // m/s^2 while falling; heavier than the rise so the way down never floats
+        const float MaxFallSpeed = 30f;  // m/s
+        const float CoyoteTime = 0.12f;  // a jump is still allowed this long after leaving the ground
+        const float JumpBuffer = 0.12f;  // a press this long before landing still jumps
+        const float AirSteer = 10f;      // m/s^2 the horizontal velocity can change while airborne
+        const float WalkSpeed = 4f, SprintSpeed = 6f, CrouchSpeed = 2.2f;
+
+        // Stamina: sprinting and jumping spend it; it refills after a short rest.
+        const float MaxStamina = 100f;
+        const float SprintDrain = 12f;       // per second: about 8 s (50 m) of sprint from full
+        const float StaminaRegen = 18f;      // per second, once RegenDelay has passed since the last spend
+        const float RegenDelay = 1f;
+        const float JumpCost = 12f;
+        const float RecoverThreshold = 25f;  // after running dry, sprint stays locked until this much is back
+        float stamina = MaxStamina, lastSpendAt = -10f;
+        public float Stamina01 { get { return stamina / MaxStamina; } }
+        public bool Exhausted { get; private set; }
+
         CharacterController controller;
         Transform aimPivot;
         float pitch, vertical;
+        float clock, lastGroundedAt = -10f, jumpPressedAt = -10f, airCap = WalkSpeed;
+        Vector3 planar;                  // horizontal velocity, world space
 
         public float Recoil;                       // gameplay aim kick in degrees, independent of settings
         public bool InputEnabled = true;           // false in perf mode
@@ -32,6 +55,7 @@ namespace Zombosland
             transform.position = position;
             controller.enabled = true;
             vertical = 0;
+            planar = Vector3.zero;
         }
 
         public void Tick(float dt)
@@ -58,13 +82,50 @@ namespace Zombosland
             aimPivot.localPosition = Vector3.up * (controller.height - 0.15f);
 
             Vector3 move = InputEnabled ? Vector3.ClampMagnitude(new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")), 1) : Vector3.zero;
-            Sprinting = InputEnabled && !crouch && Input.GetKey(KeyCode.LeftShift) && move.z > 0.1f;
-            float speed = crouch ? 2.2f : Sprinting ? 6f : 4f;
-            if (controller.isGrounded && vertical < 0) vertical = -2;
-            if (InputEnabled && controller.isGrounded && Input.GetButtonDown("Jump") && !crouch) vertical = 5;
-            vertical += Physics.gravity.y * dt;
-            controller.Move((transform.TransformDirection(move) * speed + Vector3.up * vertical) * dt);
-            Grounded = controller.isGrounded;
+            Sprinting = InputEnabled && !crouch && !Exhausted && Input.GetKey(KeyCode.LeftShift) && move.z > 0.1f;
+            float speed = crouch ? CrouchSpeed : Sprinting ? SprintSpeed : WalkSpeed;
+
+            clock += dt;
+            if (Sprinting)
+            {
+                stamina = Mathf.Max(0f, stamina - SprintDrain * dt);
+                lastSpendAt = clock;
+                if (stamina <= 0f) Exhausted = true;
+            }
+            else if (clock - lastSpendAt >= RegenDelay) stamina = Mathf.Min(MaxStamina, stamina + StaminaRegen * dt);
+            if (Exhausted && stamina >= RecoverThreshold) Exhausted = false;
+
+            bool onGround = controller.isGrounded;
+            if (onGround)
+            {
+                lastGroundedAt = clock;
+                if (vertical < 0) vertical = -2;
+            }
+            // isGrounded flickers on slopes and the press lasts one frame, so remember both for a moment.
+            if (InputEnabled && Input.GetButtonDown("Jump")) jumpPressedAt = clock;
+            if (!crouch && stamina >= JumpCost && clock - jumpPressedAt <= JumpBuffer && clock - lastGroundedAt <= CoyoteTime)
+            {
+                stamina -= JumpCost;
+                lastSpendAt = clock;
+                vertical = Mathf.Sqrt(2f * Gravity * JumpHeight);
+                jumpPressedAt = lastGroundedAt = -10f;
+                onGround = false;
+            }
+            vertical = Mathf.Max(vertical - (vertical > 0 ? Gravity : FallGravity) * dt, -MaxFallSpeed);
+
+            // Ground: instant response. Air: keep momentum, steer slowly, never faster than at take-off.
+            Vector3 wish = transform.TransformDirection(move) * speed;
+            if (onGround)
+            {
+                planar = wish;
+                airCap = Mathf.Max(wish.magnitude, WalkSpeed);
+            }
+            else if (move.sqrMagnitude > 0.01f)
+                planar = Vector3.MoveTowards(planar, Vector3.ClampMagnitude(wish, airCap), AirSteer * dt);
+
+            CollisionFlags hit = controller.Move((planar + Vector3.up * vertical) * dt);
+            if ((hit & CollisionFlags.Above) != 0 && vertical > 0) vertical = 0; // head hit: fall at once, do not hang
+            Grounded = controller.isGrounded || (vertical <= 0 && clock - lastGroundedAt <= CoyoteTime);
             Vector3 v = controller.velocity;
             HorizontalSpeed = new Vector2(v.x, v.z).magnitude;
         }

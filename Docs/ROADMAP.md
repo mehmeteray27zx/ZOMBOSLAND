@@ -7,7 +7,7 @@ Kodda "ne nerede" için: `Docs/CODEMAP.md`.
 
 | Referans | Aldığımız katman | Projede durum (2026-11-10) |
 |---|---|---|
-| Left 4 Dead 2 | Zombiler: davranış, sürü baskını, özel türler, director | Tek tür var, yavaş (kovalama 1.6–2.2 m/sn); `ZombieDirector` sadece sahne yöneticisi |
+| Left 4 Dead 2 | Zombiler: davranış, sürü baskını, özel türler, director | Tek tür var; 13 Kasım'dan beri görünce koşuyor (4,5–5,0 m/sn); `ZombieDirector` sadece sahne yöneticisi |
 | 7 Days to Die | Üs: barikat kur, zombiler yıksın, onar | Büyük kısmı kodda (`BuildSlot`, `BreakBarricade` durumu, onarım kiti) |
 | Project Zomboid | Oyuncunun kuralları: ses çeker, yaralanma, gizlilik | Gürültü sistemi ve bandaj var |
 
@@ -23,14 +23,27 @@ Hedef döngü: ses yap → director baskın yollasın → barikat zaman kazandı
 Efor: S = küçük, M = orta, L = büyük.
 
 ### 0. Bekleyenler
-- [ ] Vuruş hissi, gölge/ceset ve menü değişikliklerini oyunda dene (10 Kasım'da yazıldı; derleniyor, ama oynanarak denenmedi)
+- [x] Vuruş hissi, gölge/ceset ve menü değişikliklerini oyunda dene — 13 Kasım: geliştirici oynadı, genel olarak beğendi (madde madde geri bildirim yok); tek şikâyet zıplama, bkz. "Hareket"
 - [ ] Çizilmeyen huş ağaçlarını düzelt (`OpenWorldBuilder.Terrain.cs` → `MakeBirchPrefab`; mesh kökte değil) — S
 - [ ] v0.8 betikli testlerini bu makinede koş, raporu ve sürüm numarasını 0.8 yap
 
+### Hareket (13 Kasım oyun testinden)
+- [x] Zıplama düzeltmesi (`PlayerMotor.cs`) — yazıldı, derleniyor, oyunda denenmedi:
+  - Süzülme: tepe 1,27 m / havada ~1,0 sn idi → 0,9 m / ~0,54 sn; iniş çıkıştan ağır (`JumpHeight`, `Gravity`, `FallGravity`)
+  - Havada tam hızla anında yön değiştirme ve koşuya geçme → momentum korunur, yavaş yönlendirme (`AirSteer`)
+  - Yokuşta/kenarda basılan tuşun kaçması → 0,12 sn tolerans (`CoyoteTime`, `JumpBuffer`)
+  - Kafa tavana değince asılı kalma → hemen düşer
+- [ ] Zıplama değerlerini oynayarak ayarla (his kararı geliştiricinin) — S
+- [ ] İniş hissi: kamera çökmesi ve iniş sesi (`CameraEffects.cs`, `SfxBank.cs`) — S
+- [x] Zıplama stamina harcasın — 3 numarayla birlikte yapıldı (`JumpCost` 12; yetmezse zıplamaz)
+- [ ] 0,9 m zıplamayla ulaşılamayan yer kaldı mı, sahnelerde bak — S
+
 ### 1. Zombiler — Left 4 Dead 2
-- [ ] 1. Zombi değerlerini (hız, can, hasar, görüş) koddan veri dosyasına taşı (`ZombieDef`) — M. Aşağıdakilerin ön şartı.
-- [ ] 2. Fark edince koşarak saldırı: kovalama ~5 m/sn, can ~50–60 — S
-- [ ] 3. Stamina: sınırsız koşuyu kaldır — S
+- [x] 1. Zombi değerlerini (hız, can, hasar, görüş) koddan veri dosyasına taşı (`ZombieDef`) — yazıldı, oyun ve editör kodu derleniyor, oyunda denenmedi. `Zombie_Default.asset` sahneler yeniden üretilince oluşur; o zamana kadar zombiler aynı varsayılanlarla çalışır. Taşınmayanlar: animasyon hızları, sendeleme, `LoseTargetSeconds`, barikat değerleri.
+- [x] 2. Fark edince koşarak saldırı — yazıldı, derleniyor; 13 Kasım: geliştirici denedi, "iyi güzel" dedi. `ZombieDef` varsayılanları: kovalama 4,5–5,0 m/sn (eski 1,6–2,2), can 55 (eski 100), ivme 16, dönüş 420°/sn (eski 8 / 240; `Activate` içinde ajana uygulanır). Sesi duyunca hâlâ yürüyerek gelir (1,65 m/sn).
+  - [ ] Oynayarak bak: koşu animasyonunda ayak kayması, hedefin etrafında dönme, mermi/zombi dengesi (60 mermi), betikli QA testleri hâlâ geçiyor mu
+- [x] 3. Stamina: sınırsız koşuyu kaldır — yazıldı, derleniyor, oyunda denenmedi. `PlayerMotor.cs`: koşu 12/sn harcar (dolu depo ~8 sn / 50 m), zıplama 12, 1 sn dinlenince 18/sn dolar; sıfırlanınca %25 dolana kadar koşu kilitli. HUD'da can kutusunun üstünde ince çizgi (dolu iken gizli).
+  - [ ] Oynayarak ayarla: koşu süresi, dolma hızı, çizginin okunurluğu
 - [ ] 4. Zombiler birbirini uyarsın — S
 - [ ] 5. Bekleme halleri (yaslanma, oturma, sallanma) — M. Önce uygun animasyon var mı bakılmalı.
 
@@ -73,7 +86,13 @@ Efor: S = küçük, M = orta, L = büyük.
 ## Şimdilik yok
 Açlık-susuzluk, yetenek ağacı, serbest inşa, araç, co-op, 30+ zombilik sürü.
 
-## 10 Kasım 2026'da yapılanlar (commit edilmedi; derleniyor, oynanarak denenmedi)
+## 13 Kasım 2026'da yapılanlar (commit edilmedi; derleniyor, oynanarak denenmedi)
+- Zıplama: `PlayerMotor.cs` içinde yükseklik/yerçekimi, havada yönlendirme, tuş toleransı ve tavan çarpması. Ayar sabitleri dosyanın başında.
+- `ZombieDef`: zombi değerleri `ZombieBrain.cs` sabitlerinden `ZombieDef.cs` veri tanımına taşındı; `ZombieFactory.cs` varsayılan asset'i oluşturup prefab'lara atıyor.
+- Koşan zombi: `ZombieDef` varsayılanlarında kovalama hızı, can, ivme ve dönüş değişti. Geliştirici oynadı, "iyi güzel" dedi.
+- Stamina: `PlayerMotor.cs` (koşu ve zıplama harcar) ve `Hud.cs` (`DrawHealth` içinde ince çizgi).
+
+## 10 Kasım 2026'da yapılanlar (commit edildi; 13 Kasım'da geliştirici oynadı)
 - Menüler aşama 1: `PauseMenu.cs` ve `GameSettings.cs` yeniden yazıldı, `MainMenu.cs` ve `SettingsPanel.cs` eklendi, `UiTheme.cs`'e menü bileşenleri eklendi.
 - Vuruş hissi: hit-stop, yakın dövüş sarsıntısı, kafa vuruşu sesi ve kanı, yerde kan lekesi, ses varyantları. Ayarlar `Assets/Scripts/Sandbox.HitFeel.cs` içinde.
 - Gölge: mesafe 110 → 60, gölge haritası 4096 → 2048, yumuşak gölge Orta (`PC_RPAsset.asset`, `LookDevSetup.cs`).

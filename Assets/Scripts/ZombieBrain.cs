@@ -12,18 +12,30 @@ namespace Zombosland
         // Wander radius around the home point in metres (scene placement sets it; 6 is the old fixed value).
         [SerializeField] float wanderRadius = 6f;
 
-        // Tunables from the spec.
-        const float MaxHealth = 100f;
-        const float SightRange = 18f, SightHalfAngle = 55f, CloseSense = 2f;
-        const float AttackRange = 1.6f, AttackCooldown = 1.2f, AttackDamage = 10f;
-        // Readable telegraph: the attack clip speed in ZombieFactory is derived from this value.
-        public const float AttackWindupSeconds = 0.75f;
-        const float WalkSpeed = 1.1f, LoseTargetSeconds = 6f;
-        const float InvestigateSpeedFactor = 1.5f, InvestigateWaitSeconds = 3f, InvestigateTimeout = 20f;
+        // Tunable numbers live in a ZombieDef asset. Empty (old prefabs/scenes) = built-in defaults, identical to the old constants.
+        [SerializeField] ZombieDef def;
+        ZombieDef resolved; // looked up once: the Unity null check is too slow to repeat per value per frame
+        ZombieDef D { get { if ((object)resolved == null) resolved = def != null ? def : ZombieDef.Fallback; return resolved; } }
+        public ZombieDef Def { get { return D; } }
+        float SightRange { get { return D.sightRange; } }
+        float SightHalfAngle { get { return D.sightHalfAngle; } }
+        float CloseSense { get { return D.closeSense; } }
+        float AttackRange { get { return D.attackRange; } }
+        float AttackCooldown { get { return D.attackCooldown; } }
+        float AttackDamage { get { return D.attackDamage; } }
+        float WalkSpeed { get { return D.walkSpeed; } }
+        float InvestigateSpeedFactor { get { return D.investigateSpeedFactor; } }
+        float WindupSeconds { get { return D.attackWindupSeconds; } }
+        // Readable telegraph: the attack clip speed in ZombieFactory is derived from the windup (default value kept here for the editor).
+        public const float AttackWindupSeconds = ZombieDef.DefaultAttackWindupSeconds;
+        const float LoseTargetSeconds = 6f;
+        const float InvestigateWaitSeconds = 3f, InvestigateTimeout = 20f;
         const float BarricadeReach = 1.8f, BreakRepathSeconds = 0.4f, PartialRouteHoldSeconds = 1f;
         bool partialRouteHeld;
 
-        readonly HealthState health = new HealthState(MaxHealth);
+        // Created on first use, not in Awake: IsDead/Health may be read before Awake runs (inactive zombie, script order).
+        HealthState healthState;
+        HealthState health { get { return healthState ?? (healthState = new HealthState(D.maxHealth)); } }
         NavMeshAgent agent;
         ZombieAnimator animator;
         ZombieRagdoll ragdoll;
@@ -69,13 +81,15 @@ namespace Zombosland
             animator = GetComponent<ZombieAnimator>();
             ragdoll = GetComponent<ZombieRagdoll>();
             mover = GetComponent<CapsuleCollider>();
-            chaseSpeed = Random.Range(1.6f, 2.2f);
+            chaseSpeed = Random.Range(D.chaseSpeedMin, D.chaseSpeedMax);
             ApplyTint();
             if (animator != null) animator.SetVariant(Random.value < 0.5f ? 0 : 1);
             fallback = !owner.NavMeshReady || agent == null;
             if (!fallback)
             {
                 agent.enabled = true;
+                agent.acceleration = D.acceleration;
+                agent.angularSpeed = D.turnSpeed;
                 NavMeshHit hit;
                 if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas)) agent.Warp(hit.position);
                 else { agent.enabled = false; fallback = true; }
@@ -327,7 +341,7 @@ namespace Zombosland
             if (canSee && PlanarDistance(player.transform.position) <= AttackRange && now >= attackEnd)
             {
                 State = ZombieState.Attack;
-                windupEnd = now + AttackWindupSeconds;
+                windupEnd = now + WindupSeconds;
                 strikeDone = false;
                 if (animator != null) animator.TriggerAttack();
                 StopMoving();
@@ -358,7 +372,7 @@ namespace Zombosland
         void StartBreakStrike(float now)
         {
             breakStrikeDone = false;
-            windupEnd = now + AttackWindupSeconds;
+            windupEnd = now + WindupSeconds;
             if (animator != null) animator.TriggerAttack();
             if (SfxBank.Instance != null) SfxBank.Instance.Play(Sfx.ZombieAttack, transform.position + Vector3.up, 0.9f, Random.Range(0.9f, 1.1f), true);
         }
@@ -393,7 +407,7 @@ namespace Zombosland
             FaceTowards(breakTarget.transform.position);
             if (!breakStrikeDone)
             {
-                AttackWindup01 = Mathf.Clamp01(1f - (windupEnd - now) / AttackWindupSeconds);
+                AttackWindup01 = Mathf.Clamp01(1f - (windupEnd - now) / WindupSeconds);
                 if (now >= windupEnd)
                 {
                     breakStrikeDone = true;
@@ -434,7 +448,7 @@ namespace Zombosland
             FaceTowards(player.transform.position);
             if (!strikeDone)
             {
-                AttackWindup01 = Mathf.Clamp01(1f - (windupEnd - now) / AttackWindupSeconds);
+                AttackWindup01 = Mathf.Clamp01(1f - (windupEnd - now) / WindupSeconds);
                 if (now >= windupEnd)
                 {
                     strikeDone = true;

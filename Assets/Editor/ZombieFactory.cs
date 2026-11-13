@@ -70,6 +70,9 @@ public static class ZombieFactory
         rootBody.isKinematic = true; rootBody.useGravity = false;
 
         var brain = root.AddComponent<ZombieBrain>();
+        var brainSo = new SerializedObject(brain);
+        brainSo.FindProperty("def").objectReferenceValue = EnsureDefaultDef();
+        brainSo.ApplyModifiedPropertiesWithoutUndo();
         AddPhysics(root.transform, rig, brain);
 
         var agent = root.AddComponent<NavMeshAgent>();
@@ -95,6 +98,21 @@ public static class ZombieFactory
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
         Object.DestroyImmediate(root);
         return prefab;
+    }
+
+    // Creates Assets/Data/Zombies/Zombie_Default.asset (ZombieDef default values) only when it is missing; an existing asset is never overwritten.
+    public const string DefaultDefPath = "Assets/Data/Zombies/Zombie_Default.asset";
+
+    static ZombieDef EnsureDefaultDef()
+    {
+        var def = AssetDatabase.LoadAssetAtPath<ZombieDef>(DefaultDefPath);
+        if (def != null) return def;
+        if (!AssetDatabase.IsValidFolder("Assets/Data")) AssetDatabase.CreateFolder("Assets", "Data");
+        if (!AssetDatabase.IsValidFolder("Assets/Data/Zombies")) AssetDatabase.CreateFolder("Assets/Data", "Zombies");
+        def = ScriptableObject.CreateInstance<ZombieDef>();
+        AssetDatabase.CreateAsset(def, DefaultDefPath);
+        AssetDatabase.SaveAssets();
+        return def;
     }
 
     // ---------- primitive rig ----------
